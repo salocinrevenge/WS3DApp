@@ -21,7 +21,6 @@ public class MiniWorldObject {
     }
 
     public void render(Graphics2D g2d) {
-        System.out.println("Renderizando objeto do tipo " + type + " na posição (" + x + ", " + y + ") com world " + world);
         int x_to_draw = x;
         int y_to_draw = y;
 

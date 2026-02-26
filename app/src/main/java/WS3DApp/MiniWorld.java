@@ -4,20 +4,24 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
+import ws3dproxy.model.World;
+
 public class MiniWorld {
 
     int x;
     int y;
     int width;
     int height;
+    World world;
 
     ArrayList<MiniWorldObject> objects = new ArrayList<>();
 
-    public MiniWorld(int x, int y, int width, int height) {
+    public MiniWorld(int x, int y, int width, int height, World world) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.world = world;
     }
 
 
@@ -52,11 +56,78 @@ public class MiniWorld {
                         MiniWorldObject extraObj = objects.get(idx);
                         extraObj.x2 = mx;
                         extraObj.y2 = my;
+                        selectedObject = extraObj;
                     }
+                }
+
+                if (!addOnWorld(selectedObject))
+                {
+                    objects.remove(selectedObject);
                 }
                 return null;
             }
         }
         return selectedObject;
+    }
+
+    private float toCopelia_X(int x){
+        float mini_world_x = x-this.x;
+
+        return (mini_world_x*this.world.getEnvironmentHeight()/this.width);
+
+    }
+
+    private float toCopelia_Y(int y){
+        float mini_world_y = y-this.y;
+
+        return (mini_world_y*this.world.getEnvironmentWidth()/this.height);
+
+    }
+
+
+    public boolean addOnWorld(MiniWorldObject obj)
+    {
+        try {
+            switch (obj.type) {
+                case MiniObjType.MACA:
+                    World.createFood(0, toCopelia_Y(obj.y), toCopelia_X(obj.x));
+                    break;
+                case MiniObjType.NOZ:
+                    World.createFood(1, toCopelia_Y(obj.y), toCopelia_X(obj.x));
+                    break;
+
+                case MiniObjType.JOIA_RED:
+                    World.createJewel(0, toCopelia_Y(obj.y), toCopelia_X(obj.x));
+                    break;
+
+                case MiniObjType.JOIA_GREEN:
+                    World.createJewel(1, toCopelia_Y(obj.y), toCopelia_X(obj.x));
+                    break;
+
+                case MiniObjType.JOIA_BLUE:
+                    World.createJewel(2, toCopelia_Y(obj.y), toCopelia_X(obj.x));
+                    break;
+                case MiniObjType.JOIA_YELLOW:
+                    World.createJewel(3, toCopelia_Y(obj.y), toCopelia_X(obj.x));
+                    break;
+
+                case MiniObjType.JOIA_MAGENTA:
+                    World.createJewel(4, toCopelia_Y(obj.y), toCopelia_X(obj.x));
+                    break;
+
+                case MiniObjType.JOIA_WHITE:
+                    World.createJewel(5, toCopelia_Y(obj.y), toCopelia_X(obj.x));
+                    break;
+                case MiniObjType.BRICK:
+                    World.createBrick(3, toCopelia_Y(obj.y), toCopelia_X(obj.x), toCopelia_Y(obj.y2), toCopelia_X(obj.x2));
+            
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println("Erro capturado: "+ e);
+            return false;
+        }
+        return true;
     }
 }

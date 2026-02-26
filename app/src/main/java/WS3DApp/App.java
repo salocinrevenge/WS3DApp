@@ -30,16 +30,20 @@ public class App {
             width = w.getEnvironmentWidth();
             height = w.getEnvironmentHeight();
             
+            
             w.reset();
-            World.createFood(0, 350, 75);
-            World.createFood(0, 100, 220);
-            World.createFood(1, 250, 210);
-            World.createDeliverySpot(250, 250);
-            World.createJewel(0, 10, 50);
-            World.createJewel(1, 100, 500);
-            World.createBrick(3, 500, 200, 505, 300);
-            c = proxy.createCreature(100,450,0);
-            c.start();
+
+            Window window = new Window(w);
+
+            // World.createFood(0, 350, 75);
+            // World.createFood(0, 100, 220);
+            // World.createFood(1, 250, 210);
+            // World.createDeliverySpot(250, 250);
+            // World.createJewel(0, 10, 50);
+            // World.createJewel(1, 100, 500);
+            // World.createBrick(3, 500, 200, 505, 300);
+            // c = proxy.createCreature(100,450,0);
+            // c.start();
             
         } catch (Exception e) {
             System.out.println("Erro capturado"); 
@@ -48,9 +52,9 @@ public class App {
             
 
     public static void main(String[] args) {
-        Window w = new Window();
+        
         // Random r = new Random();
-        // App app = new App();
+        App app = new App();
         // try {
         //     while(true) {
 

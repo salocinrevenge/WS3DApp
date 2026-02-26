@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 
+import ws3dproxy.model.World;
+
 
 public class Window extends Frame {
     ArrayList<CustomButton> mainButtons = new ArrayList<>();
@@ -20,9 +22,11 @@ public class Window extends Frame {
     MiniWorldObject selectedObject = null;
 
     MiniWorld miniWorld;
+    World world;
 
-    public Window() {
+    public Window(World world) {
         setTitle("Controle da simulação");
+        this.world = world;
         int WIDTH = 1000;
         int HEIGHT = 800;
         setSize(WIDTH, HEIGHT);
@@ -49,7 +53,7 @@ public class Window extends Frame {
         createButtons.add(new CustomButton(800, 50, 100, 50, "Cristal \n magenta", () -> this.add_object(MiniObjType.JOIA_MAGENTA), 20));
         createButtons.add(new CustomButton(800, 120, 100, 50, "Cristal \n branco", () -> this.add_object(MiniObjType.JOIA_WHITE), 20));
         
-        miniWorld = new MiniWorld(50, 200, 550, 550);
+        miniWorld = new MiniWorld(50, 200, 550, 550, world);
 
 
         // Adiciona listeners globais
@@ -111,5 +115,7 @@ public class Window extends Frame {
     private void add_object(MiniObjType type) {
         state = EnumState.CRIANDO;
         selectedObject = new MiniWorldObject(0, 0, type, null, null);
+
+
     }
 }
