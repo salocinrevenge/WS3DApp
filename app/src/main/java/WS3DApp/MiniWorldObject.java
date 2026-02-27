@@ -22,13 +22,13 @@ public class MiniWorldObject {
         this.extra = extra;
     }
 
-    public void render(Graphics2D g2d) {
+    public void render(Graphics2D g2d, boolean highlight) {
 
         switch (this.type) {
             case CRIATURA:
                 // corpo cinza preenchido
-                g2d.setColor(java.awt.Color.GRAY);
-                g2d.fillOval(x, y, 20, 20);
+                g2d.setColor(highlight ? java.awt.Color.RED : java.awt.Color.GRAY);
+                // g2d.fillOval(x, y, 20, 20);
                 g2d.fillRect(x, y, 20, 20);
                 // olhos azuis preenchidos
                 g2d.setColor(java.awt.Color.BLUE);

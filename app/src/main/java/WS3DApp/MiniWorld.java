@@ -19,7 +19,9 @@ public class MiniWorld {
     
 
     ArrayList<MiniWorldObject> objects = new ArrayList<>();
+    ArrayList<MiniWorldObject> miniCreatures = new ArrayList<>();
     ArrayList<Creature> creatures = new ArrayList<>();
+    int selectedCreatureIndex = -1;
 
     public MiniWorld(int x, int y, int width, int height, World world, WS3DProxy proxy) {
         this.x = x;
@@ -35,7 +37,23 @@ public class MiniWorld {
         g2d.setStroke(new BasicStroke(2.0f));
         g2d.drawRect(x, y, width, height);
         for(MiniWorldObject obj : objects) {
-            obj.render(g2d);
+            boolean hightlight = false;
+            if (obj.type == MiniObjType.CRIATURA) {
+                hightlight = (miniCreatures.indexOf(obj) == selectedCreatureIndex);
+            }
+            obj.render(g2d, hightlight);
+        }
+    }
+
+    public void update() {
+        for (Creature creature : creatures) {
+            creature.updateState();
+            int idx = creatures.indexOf(creature);
+            if (idx >= 0 && idx < miniCreatures.size()) {
+                MiniWorldObject obj = miniCreatures.get(idx);
+                obj.x = toMiniWorld_X(creature.s.comY);
+                obj.y = toMiniWorld_Y(creature.s.comX);
+            }
         }
     }
 
@@ -85,6 +103,40 @@ public class MiniWorld {
         return selectedObject;
     }
 
+    public void walk_to(int mx, int my) {
+        if (selectedCreatureIndex >= 0 && selectedCreatureIndex < miniCreatures.size()) {
+            Creature c = creatures.get(selectedCreatureIndex);
+            try {
+                c.moveto(12,toCopelia_Y(my), toCopelia_X(mx));
+            } catch (Exception e) {
+                System.out.println("Erro capturado: "+ e);
+            }
+        }
+    }
+
+    public MiniWorldObject getSelectedCreature() {
+        if (selectedCreatureIndex >= 0 && selectedCreatureIndex < miniCreatures.size()) {
+            return miniCreatures.get(selectedCreatureIndex);
+        }
+        return null;
+    }
+
+    public void selectNextCreature() {
+        if (miniCreatures.size() > 0) {
+            selectedCreatureIndex = (selectedCreatureIndex + 1) % miniCreatures.size();
+        }
+    }
+
+    public void selectPreviousCreature() {
+        if (miniCreatures.size() > 0) {
+            selectedCreatureIndex = (selectedCreatureIndex - 1 + miniCreatures.size()) % miniCreatures.size();
+        }
+    }
+
+    public void unselectCreature() {
+        selectedCreatureIndex = -1;
+    }
+
     private float toCopelia_X(int x){
         float mini_world_x = x-this.x;
 
@@ -97,6 +149,58 @@ public class MiniWorld {
 
         return (mini_world_y*this.world.getEnvironmentWidth()/this.height);
 
+    }
+
+    private int toMiniWorld_X(double x){
+        double copelia_x = x;
+
+        return (int)(copelia_x*this.width/this.world.getEnvironmentHeight())+this.x;
+
+    }
+
+    private int toMiniWorld_Y(double comY){
+        double copelia_y = comY;
+
+        return (int)(copelia_y*this.height/this.world.getEnvironmentWidth())+this.y;
+
+    }
+
+    public double getSelectedCreatureFuel() {
+        if (selectedCreatureIndex >= 0 && selectedCreatureIndex < miniCreatures.size()) {
+            // creatures.get(selectedCreatureIndex).updateState();
+            return creatures.get(selectedCreatureIndex).getFuel();
+        }
+        return 0;
+    }
+
+    public void act(String action) {
+        if (selectedCreatureIndex >= 0 && selectedCreatureIndex < creatures.size()) {
+            Creature c = creatures.get(selectedCreatureIndex);
+            try {
+                switch(action) {
+                    case "W":
+                        c.move(4.0,4.0,0.0);
+                        break;
+                    case "S":
+                        c.move(-4.0,-4.0,0.0);
+                        break;
+                    case "A":
+                        c.move(4.0,-4.0,0.0);
+                        break;
+                    case "D":
+                        c.move(-4.0,4.0,0.0);
+                        break;
+                    case "w":
+                    case "s":
+                    case "a":
+                    case "d":
+                        c.move(0.0,0.0,0.0);
+                        break;
+                }
+            } catch (Exception e) {
+                System.out.println("Erro capturado: "+ e);
+            }
+        }
     }
 
 
@@ -140,6 +244,7 @@ public class MiniWorld {
                     Creature c = proxy.createCreature(toCopelia_Y(obj.y),toCopelia_X(obj.x),0);
                     c.start();
                     creatures.add(c);
+                    miniCreatures.add(obj);
                     System.out.println("Criatura criada na posição (" + toCopelia_Y(obj.y) + ", " + toCopelia_X(obj.x) + ")");
                     break;
                 default:
