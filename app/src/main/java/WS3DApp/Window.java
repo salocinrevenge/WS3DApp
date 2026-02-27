@@ -2,15 +2,16 @@ package WS3DApp;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-
+import ws3dproxy.WS3DProxy;
 import ws3dproxy.model.World;
+
 
 
 public class Window extends Frame {
     ArrayList<CustomButton> mainButtons = new ArrayList<>();
     ArrayList<CustomButton> createButtons = new ArrayList<>();
     EnumState state 
-    = EnumState.SELECIONANDO;
+    = EnumState.INICIO;
 
     public enum EnumState {
         INICIO,
@@ -23,10 +24,12 @@ public class Window extends Frame {
 
     MiniWorld miniWorld;
     World world;
+    WS3DProxy proxy;
 
-    public Window(World world) {
+    public Window(World world, WS3DProxy proxy) {
         setTitle("Controle da simulação");
         this.world = world;
+        this.proxy = proxy;
         int WIDTH = 1000;
         int HEIGHT = 800;
         setSize(WIDTH, HEIGHT);
@@ -41,7 +44,7 @@ public class Window extends Frame {
         // Cria botões
         mainButtons.add(new CustomButton(50, 50, 100, 50, "Criar", () -> this.state=EnumState.CRIAR, 20));
         mainButtons.add(new CustomButton(50, 120, 100, 50, "Selecionar", () -> this.state=EnumState.SELECIONANDO, 20));
-        mainButtons.add(new CustomButton(900, 750, 100, 50, "🔙", () -> this.state=EnumState.SELECIONANDO, 60));
+        mainButtons.add(new CustomButton(900, 750, 100, 50, "🔙", () -> this.state=EnumState.INICIO, 60));
         createButtons.add(new CustomButton(200, 50, 100, 50, "Criatura", () -> this.add_object(MiniObjType.CRIATURA), 20));
         createButtons.add(new CustomButton(200, 120, 100, 50, "Maçã", () -> this.add_object(MiniObjType.MACA), 20));
         createButtons.add(new CustomButton(350, 50, 100, 50, "Noz", () -> this.add_object(MiniObjType.NOZ), 20));
@@ -53,7 +56,7 @@ public class Window extends Frame {
         createButtons.add(new CustomButton(800, 50, 100, 50, "Cristal \n magenta", () -> this.add_object(MiniObjType.JOIA_MAGENTA), 20));
         createButtons.add(new CustomButton(800, 120, 100, 50, "Cristal \n branco", () -> this.add_object(MiniObjType.JOIA_WHITE), 20));
         
-        miniWorld = new MiniWorld(50, 200, 550, 550, world);
+        miniWorld = new MiniWorld(50, 200, 550, 550, world, proxy);
 
 
         // Adiciona listeners globais
@@ -68,13 +71,19 @@ public class Window extends Frame {
                         b.handleMousePressed(e.getX(), e.getY());
                     }
                 }
-                selectedObject = miniWorld.handleMousePressed(e.getX(), e.getY(), selectedObject);
+                
+                MiniWorldObject newSelectedObject = miniWorld.handleMousePressed(e.getX(), e.getY(), selectedObject);
 
+                if (selectedObject != newSelectedObject || (newSelectedObject != null && newSelectedObject.type == MiniObjType.BRICK2)) {
+                    selectedObject = newSelectedObject;
+                    state = EnumState.INICIO;
+                }
                 repaint();
             }
         });
         addMouseMotionListener(new MouseMotionAdapter() {
             public void mouseMoved(MouseEvent e) {
+                System.out.println("mouse moved, state atual: " + state);
                 for (CustomButton b : mainButtons) {
                     b.handleMouseMoved(e.getX(), e.getY());
                 }
@@ -96,6 +105,7 @@ public class Window extends Frame {
 
     @Override
     public void paint(Graphics g) {
+        System.out.println("Repaint chamado, state atual: " + state);
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
         for (CustomButton b : mainButtons) {

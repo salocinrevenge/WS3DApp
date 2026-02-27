@@ -4,7 +4,9 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
+import ws3dproxy.model.Creature;
 import ws3dproxy.model.World;
+import ws3dproxy.WS3DProxy;
 
 public class MiniWorld {
 
@@ -13,15 +15,19 @@ public class MiniWorld {
     int width;
     int height;
     World world;
+    WS3DProxy proxy;
+    
 
     ArrayList<MiniWorldObject> objects = new ArrayList<>();
+    ArrayList<Creature> creatures = new ArrayList<>();
 
-    public MiniWorld(int x, int y, int width, int height, World world) {
+    public MiniWorld(int x, int y, int width, int height, World world, WS3DProxy proxy) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.world = world;
+        this.proxy = proxy;
     }
 
 
@@ -56,6 +62,15 @@ public class MiniWorld {
                         MiniWorldObject extraObj = objects.get(idx);
                         extraObj.x2 = mx;
                         extraObj.y2 = my;
+                        int temp1, temp2;
+                        temp1 = extraObj.x;
+                        temp2 = extraObj.x2;
+                        extraObj.x = Math.min(temp1, temp2);
+                        extraObj.x2 = Math.max(temp1, temp2);
+                        temp1 = extraObj.y;
+                        temp2 = extraObj.y2;
+                        extraObj.y = Math.min(temp1, temp2);
+                        extraObj.y2 = Math.max(temp1, temp2);
                         selectedObject = extraObj;
                     }
                 }
@@ -120,7 +135,13 @@ public class MiniWorld {
                     break;
                 case MiniObjType.BRICK:
                     World.createBrick(3, toCopelia_Y(obj.y), toCopelia_X(obj.x), toCopelia_Y(obj.y2), toCopelia_X(obj.x2));
-            
+                    break;
+                case MiniObjType.CRIATURA:
+                    Creature c = proxy.createCreature(toCopelia_Y(obj.y),toCopelia_X(obj.x),0);
+                    c.start();
+                    creatures.add(c);
+                    System.out.println("Criatura criada na posição (" + toCopelia_Y(obj.y) + ", " + toCopelia_X(obj.x) + ")");
+                    break;
                 default:
                     break;
             }

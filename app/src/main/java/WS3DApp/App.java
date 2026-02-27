@@ -33,7 +33,7 @@ public class App {
             
             w.reset();
 
-            Window window = new Window(w);
+            Window window = new Window(w, proxy);
 
             // World.createFood(0, 350, 75);
             // World.createFood(0, 100, 220);
