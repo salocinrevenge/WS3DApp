@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.swing.Timer;
 
+import ws3dproxy.CommandExecException;
 import ws3dproxy.WS3DProxy;
 import ws3dproxy.model.World;
 
@@ -30,14 +31,13 @@ public class Window extends Frame {
     MiniWorld miniWorld;
     World world;
     WS3DProxy proxy;
-    Bag bag;
-    Vision vision;
+    int points = 0;
 
     public Window(World world, WS3DProxy proxy) {
         setTitle("Controle da simulação");
         this.world = world;
         this.proxy = proxy;
-        int WIDTH = 1000;
+        int WIDTH = 1200;
         int HEIGHT = 800;
         setSize(WIDTH, HEIGHT);
         setLayout(null);
@@ -69,8 +69,6 @@ public class Window extends Frame {
         selectButtons.add(new CustomButton(500, 50, 100, 50, "Unselect \n Creature", () -> this.miniWorld.unselectCreature(), 20));
         healthBar = new CustomBar(200, 120, 200, 50, "Fuel", 1000, 1000, 20);
         
-        this.vision = new Vision(450, 120, 300, 50);
-        this.bag = new Bag(700, 220, 300, 550);
         // Adiciona listeners globais
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -91,7 +89,7 @@ public class Window extends Frame {
                     }
                     
                     if (e.getButton() == MouseEvent.BUTTON3) {
-                        miniWorld.walk_to(e.getX(), e.getY());
+                        miniWorld.getSelectedCreature().move(4.0, e.getX(), e.getY());
 
                     }
 
@@ -164,6 +162,12 @@ public class Window extends Frame {
                     case KeyEvent.VK_S:
                         miniWorld.act("S");
                         break;
+                    case KeyEvent.VK_J: // Comer o item mais próximo na visão
+                        miniWorld.getSelectedCreature().acao("eat");
+                        
+                        
+                        
+                    
                 }
             }
 
@@ -216,8 +220,6 @@ public class Window extends Frame {
                 b.render(g2d);
             }
             healthBar.render(g2d);
-            bag.render(g2d);
-            vision.render(g2d);
         }
         miniWorld.render(g2d);
         if(this.selectedObject != null) {
@@ -225,6 +227,10 @@ public class Window extends Frame {
         }
         
         healthBar.updateValue(miniWorld.getSelectedCreatureFuel());
+
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.BOLD, 20));
+        g2d.drawString("Pontos: " + points, getWidth() - 150, 50);
     }
 
     private void add_object(MiniObjType type) {
