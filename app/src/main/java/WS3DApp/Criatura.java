@@ -51,6 +51,7 @@ public class Criatura {
 
     public void moveto(int vel, int x, int y) {
         try {
+            System.out.println("AAAA"+x+" "+y+" e vel "+ vel);
             proxyCreature.moveto(vel,miniWorld.toCopelia_Y(y), miniWorld.toCopelia_X(x));
         } catch (Exception e) {
             System.out.println("Erro capturado: "+ e);
@@ -123,9 +124,9 @@ public class Criatura {
                 break;
         }
     }
-    public void move(double vel, double x, double y) {
+    public void move(double dir, double esq) {
         try {
-            proxyCreature.moveto(vel,miniWorld.toCopelia_Y((int)y), miniWorld.toCopelia_X((int)x));
+            proxyCreature.move(dir,esq, proxyCreature.getPitch());
         } catch (Exception e) {
             System.out.println("Erro capturado: "+ e);
         }

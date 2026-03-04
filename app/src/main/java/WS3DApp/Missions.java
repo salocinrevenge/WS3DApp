@@ -1,5 +1,6 @@
 package WS3DApp;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class Missions {
 
     public void render(Graphics2D g2d) {
         // Implement rendering logic for missions
+        g2d.setColor(Color.WHITE);
         g2d.drawString("Missions:", x, y);
         if (currentMissions != null) {
             int y = this.y + 20;

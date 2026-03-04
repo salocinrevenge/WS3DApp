@@ -29,7 +29,7 @@ public class CustomBar {
     }
 
     public void updateValue(double new_value) {
-        
+        System.out.println("Updated to "+new_value);
         this.current_value = (float) new_value;
     }
 

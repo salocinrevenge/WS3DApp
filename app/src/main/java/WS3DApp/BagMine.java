@@ -34,12 +34,13 @@ public class BagMine {
         }
         String mochila = bag.printBag();
 
+        g2d.setColor(Color.WHITE);
         String[] linhas = mochila.split("\n");
         int linhaAltura = g2d.getFontMetrics().getHeight();
         for (int i = 0; i < linhas.length; i++) {
             g2d.drawString(linhas[i], x + 10, y + 20 + i * linhaAltura);
         }
-        g2d.setColor(Color.BLACK);
+        
         g2d.drawRect(x, y, width, height);
     }
 }

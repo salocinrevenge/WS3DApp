@@ -174,9 +174,10 @@ public class Window extends Canvas {
             }
             
             if (button == MouseEvent.BUTTON3) {
+                System.out.println("HEY");
                 Criatura selected = miniWorld.getSelectedCreature();
                 if (selected != null) {
-                    selected.move(4.0, x, y);
+                    selected.moveto(4, x, y);
                 }
             }
         }
@@ -186,7 +187,7 @@ public class Window extends Canvas {
 
             if (selectedObject != newSelectedObject || (newSelectedObject != null && newSelectedObject.type == MiniObjType.BRICK2)) {
                 selectedObject = newSelectedObject;
-                state = EnumState.INICIO;
+                state = EnumState.CRIANDO;
             }
         }
     }

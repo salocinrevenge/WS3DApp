@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.List;
 import ws3dproxy.model.Creature;
+import ws3dproxy.model.Leaflet;
 import ws3dproxy.model.Thing;
 
 
@@ -48,7 +49,23 @@ public class Vision {
     public void render(Graphics2D g2d) {
         // Implement rendering logic for vision
         // see();
-        g2d.setColor(Color.BLACK);
+        System.out.println("VERRR");
+        int maxLen = 50;
+        if(this.detectedObjects != null)
+        {
+            for (Thing thing : this.detectedObjects) {
+                String text = "- " + thing.toString();
+                while (text.length() > 0) {
+                    int len = Math.min(maxLen, text.length());
+                    String line = text.substring(0, len);
+                    g2d.drawString(line, x, y);
+                    y += 20;
+                    text = text.substring(len);
+                }
+            }
+        }
+        
+        g2d.setColor(Color.WHITE);
         g2d.drawRect(x, y, width, height);
     }
 }

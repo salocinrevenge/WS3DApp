@@ -17,7 +17,8 @@ public class MiniWorld {
     World world;
     WS3DProxy proxy;
     Window window;
-    int contador = 10000;
+    int contador = 100;
+    boolean wasWalking = false;
     
 
     ArrayList<MiniWorldObject> objects = new ArrayList<>();
@@ -57,8 +58,9 @@ public class MiniWorld {
 
     public void update() {
         contador--;
+        
         if (contador <= 0) {
-            contador = 100;
+            
             for (Criatura creature : creatures) {
                 if( contador == 1 ){
                     System.out.println("Atualizando criatura...");
@@ -70,6 +72,7 @@ public class MiniWorld {
                     }
                 }
             }
+            contador = 100;
         }
     }
 
@@ -153,15 +156,15 @@ public class MiniWorld {
         selectedCreatureIndex = -1;
     }
 
-    public float toCopelia_X(int x){
-        float mini_world_x = x-this.x;
+    public double toCopelia_X(double x){
+        double mini_world_x = x-this.x;
 
         return (mini_world_x*this.world.getEnvironmentHeight()/this.width);
 
     }
 
-    public float toCopelia_Y(int y){
-        float mini_world_y = y-this.y;
+    public double toCopelia_Y(double y){
+        double mini_world_y = y-this.y;
 
         return (mini_world_y*this.world.getEnvironmentWidth()/this.height);
 
@@ -183,8 +186,7 @@ public class MiniWorld {
 
     public double getSelectedCreatureFuel() {
         if (selectedCreatureIndex >= 0 && selectedCreatureIndex < miniCreatures.size()) {
-            // creatures.get(selectedCreatureIndex).updateState();
-            return creatures.get(selectedCreatureIndex).getFuel();
+            return creatures.get(selectedCreatureIndex).proxyCreature.getFuel();
         }
         return 0;
     }
@@ -192,25 +194,41 @@ public class MiniWorld {
     public void act(String action) {
         if (selectedCreatureIndex >= 0 && selectedCreatureIndex < creatures.size()) {
             Criatura c = creatures.get(selectedCreatureIndex);
+            boolean ignorar = false;
+            System.out.println("Action: " + action);
+            if(action == "D")
+            {
+                System.out.println("EEEEEEEEEEEEE");
+            }
             try {
                 switch(action) {
                     case "W":
-                        c.move(4.0,4.0,0.0);
+                        c.move(5.0,5.0);
+                        wasWalking = true;
+                        ignorar = true;
                         break;
                     case "S":
-                        c.move(-4.0,-4.0,0.0);
+                        c.move(-5.0,-5.0);
+                        wasWalking = true;
+                        ignorar = true;
                         break;
                     case "A":
-                        c.move(4.0,-4.0,0.0);
+                        c.move(5.0,-5.0);
+                        wasWalking = true;
+                        ignorar = true;
                         break;
                     case "D":
-                        c.move(-4.0,4.0,0.0);
+                        c.move(-5.0,5.0);
+                        wasWalking = true;
+                        ignorar = true;
                         break;
                     case "w":
                     case "s":
                     case "a":
                     case "d":
-                        c.move(0.0,0.0,0.0);
+                        
+
+                        
                         break;
                 }
             } catch (Exception e) {
