@@ -3,6 +3,9 @@
  */
 package WS3DApp; 
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.image.BufferStrategy;
 import java.util.Random;
 import ws3dproxy.WS3DProxy;
 import ws3dproxy.model.Creature;
@@ -12,28 +15,58 @@ import ws3dproxy.model.WorldPoint;
 
 import WS3DApp.Window;
 
-public class App {
+public class App extends java.awt.Canvas implements Runnable {
     
     public Creature c;
     public World w;
     public int width;
+    private Thread thread;
+    public Window window;
     public int height;
+    private boolean running = false;
+    private final double UPDATE_CAP = 1.0/60.0;
+    private static final long serialVersionUID = 1550691097823471818L;
     
+    // Variables for input handling
+    private int mouseX = 0, mouseY = 0;
+    private boolean mousePressed = false;
+    private boolean mouseClicked = false;
+    private int mouseButton = 0;
+    private boolean[] keysPressed = new boolean[256];
+    private boolean[] keysClicked = new boolean[256];
     public String getGreeting() {
         return("Greetings...");
+    }
+
+    public synchronized void start() {
+        thread = new Thread(this);
+        thread.start();
+        running = true;
+    }
+
+    public synchronized void stop() {
+        try {
+            thread.join();
+            running = false;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
     
     public App() {
         WS3DProxy proxy = new WS3DProxy();
+        System.out.println("App initialized");
         try {   
             w = World.getInstance();
+            this.window = new Window(w, proxy, this);
             width = w.getEnvironmentWidth();
             height = w.getEnvironmentHeight();
             
             
             w.reset();
+            // Criar delivery spot padrão no centro\n            World.createDeliverySpot(w.getEnvironmentWidth()/2, w.getEnvironmentHeight()/2);
 
-            Window window = new Window(w, proxy);
 
             // World.createFood(0, 350, 75);
             // World.createFood(0, 100, 220);
@@ -48,8 +81,138 @@ public class App {
         } catch (Exception e) {
             System.out.println("Erro capturado"); 
         }
+
     }
             
+    public void run(){
+            System.out.println("Iniciando aplicação...");
+            running = true;
+            boolean render = false;
+            double firstTime  = 0;
+            double lastTime   = System.nanoTime() / 1e9d;
+            double passedTime = 0;
+            double unprocessedTime = 0;
+
+            double frameTime = 0;
+            int frames = 0;
+            int fps = 0;
+
+            while(running){
+                  render = false;
+
+                  firstTime = System.nanoTime() / 1e9d;
+                  passedTime = firstTime - lastTime;
+                  lastTime = firstTime;
+
+                  unprocessedTime += passedTime;
+                  frameTime += passedTime;
+
+                  while(unprocessedTime >= UPDATE_CAP){
+                        unprocessedTime -= UPDATE_CAP;
+                        render = true;
+
+                        this.handleInput();
+                        this.window.update();
+                        
+                        if(frameTime >= 1.0){
+                              frameTime = 0;
+                              fps = frames;
+                              frames = 0;
+                              //System.out.println("FPS: " + fps);
+                        }
+                  }
+
+                  if(render){
+                        this.render();
+                        frames++;
+                  }
+                  else{
+                        try{
+                              Thread.sleep(1);
+                        }
+                        catch(InterruptedException e){
+                              e.printStackTrace();
+                        }
+                  }
+            }
+            stop();
+            dispose();
+      }
+
+    public void render() {
+        // Aguardar que o componente esteja displayable antes de criar BufferStrategy
+        if (!this.isDisplayable()) {
+            return;
+        }
+        
+        BufferStrategy bs = this.getBufferStrategy();
+        if (bs == null) {
+            this.createBufferStrategy(3);
+            return;
+        }
+        Graphics g = bs.getDrawGraphics();
+        
+        // Limpar a tela inteira com cor preta
+        g.setColor(Color.black);
+        g.fillRect(0, 0, getWidth(), getHeight());
+        
+        this.window.render(g);
+
+        g.dispose();
+        bs.show();
+    }
+    
+    public void handleInput() {
+        // Handle mouse input
+        if (mouseClicked) {
+            window.handleMouseInput(mouseX, mouseY, mouseButton);
+            mouseClicked = false; // Reset after processing
+        }
+        
+        // Handle mouse movement
+        window.handleMouseMove(mouseX, mouseY);
+        
+        // Handle keyboard input
+        for (int i = 0; i < keysClicked.length; i++) {
+            if (keysClicked[i]) {
+                window.handleKeyInput(i, true);
+                keysClicked[i] = false; // Reset after processing
+            }
+        }
+        
+        // Handle key releases
+        for (int i = 0; i < keysPressed.length; i++) {
+            if (!keysPressed[i]) {
+                window.handleKeyInput(i, false);
+            }
+        }
+    }
+    
+    // Methods for input handling
+    public void setMouseInput(int x, int y, int button, boolean clicked) {
+        this.mouseX = x;
+        this.mouseY = y;
+        this.mouseButton = button;
+        this.mouseClicked = clicked;
+    }
+    
+    public void setMousePosition(int x, int y) {
+        this.mouseX = x;
+        this.mouseY = y;
+    }
+    
+    public void setKeyInput(int keyCode, boolean pressed) {
+        if (keyCode < keysPressed.length) {
+            if (pressed && !keysPressed[keyCode]) {
+                keysClicked[keyCode] = true; // First press
+            }
+            keysPressed[keyCode] = pressed;
+        }
+    }
+               
+    private void dispose() {
+        // Clean up resources here
+    }
 
     public static void main(String[] args) {
         

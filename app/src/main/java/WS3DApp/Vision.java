@@ -11,29 +11,28 @@ public class Vision {
     private List<Thing> detectedObjects;
     int x, y, width, height;
     private Creature creature;
-    public void see() {
-        // Implement object detection logic
-        detectedObjects = detectObjects();
-    }
 
     public void update_creature(Creature creature_new) {
         this.creature = creature_new;
-        see();
+        detectObjects();
     }
 
     public Thing getFirstThingInVision() {
-        if (detectedObjects != null && !detectedObjects.isEmpty()) {
-            return detectedObjects.get(0);
+        if (this.detectedObjects != null && ! this.detectedObjects.isEmpty()) {
+            return this.detectedObjects.get(0);
         }
         return null;
     }
 
     private List<Thing> detectObjects() {
         // Your detection logic here
-        for (Thing t : this.creature.getThingsInVision()) {
-                    System.out.print(" "+t.getName());
-                }
-        return null;
+        System.out.print("Detecting objects in vision: ");
+        this.detectedObjects = creature.getThingsInVision();
+        for (Thing t : this.detectedObjects) {
+            System.out.print(" "+t.getName());
+        }
+        System.out.println();
+        return this.detectedObjects;
     }
     
     public Vision(int x, int y, int width, int height) {

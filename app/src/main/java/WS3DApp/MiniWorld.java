@@ -16,6 +16,8 @@ public class MiniWorld {
     int height;
     World world;
     WS3DProxy proxy;
+    Window window;
+    int contador = 10000;
     
 
     ArrayList<MiniWorldObject> objects = new ArrayList<>();
@@ -23,18 +25,20 @@ public class MiniWorld {
     ArrayList<Criatura> creatures = new ArrayList<>();
     int selectedCreatureIndex = -1;
 
-    public MiniWorld(int x, int y, int width, int height, World world, WS3DProxy proxy) {
+    public MiniWorld(int x, int y, int width, int height, World world, WS3DProxy proxy, Window window) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.world = world;
         this.proxy = proxy;
+        this.window = window;
     }
 
 
     public void render(Graphics2D g2d) {
         g2d.setStroke(new BasicStroke(2.0f));
+        g2d.setColor(java.awt.Color.WHITE);
         g2d.drawRect(x, y, width, height);
         for(MiniWorldObject obj : objects) {
             boolean hightlight = false;
@@ -43,16 +47,28 @@ public class MiniWorld {
             }
             obj.render(g2d, hightlight);
         }
+
+        if (this.window.state != Window.EnumState.CRIANDO) {
+            if (selectedCreatureIndex >= 0 && selectedCreatureIndex < creatures.size()) {
+                creatures.get(selectedCreatureIndex).render(g2d);
+            }
+        }
     }
 
     public void update() {
-        for (Criatura creature : creatures) {
-            creature.updateState();
-            int idx = creatures.indexOf(creature);
-            if (idx >= 0 && idx < miniCreatures.size()) {
-                MiniWorldObject obj = miniCreatures.get(idx);
-                obj.x = toMiniWorld_X(creature.getX());
-                obj.y = toMiniWorld_Y(creature.getY());
+        contador--;
+        if (contador <= 0) {
+            contador = 100;
+            for (Criatura creature : creatures) {
+                if( contador == 1 ){
+                    System.out.println("Atualizando criatura...");
+                    int idx = creatures.indexOf(creature);
+                    if (idx >= 0 && idx < miniCreatures.size()) {
+                        MiniWorldObject obj = miniCreatures.get(idx);
+                        obj.x = toMiniWorld_X(creature.getX());
+                        obj.y = toMiniWorld_Y(creature.getY());
+                    }
+                }
             }
         }
     }
@@ -241,7 +257,9 @@ public class MiniWorld {
                     World.createBrick(3, toCopelia_Y(obj.y), toCopelia_X(obj.x), toCopelia_Y(obj.y2), toCopelia_X(obj.x2));
                     break;
                 case MiniObjType.CRIATURA:
+                    System.out.println("Criando criatura na posição (" + toCopelia_Y(obj.y) + ", " + toCopelia_X(obj.x) + ")");
                     Creature c = proxy.createCreature(toCopelia_Y(obj.y),toCopelia_X(obj.x),0);
+                    System.out.println("Criatura criada");
                     c.start();
                     creatures.add(new Criatura(c, this));
                     miniCreatures.add(obj);
@@ -255,5 +273,57 @@ public class MiniWorld {
             return false;
         }
         return true;
+    }
+
+
+    public Object colect() {
+        // Faz a criatura selecionada coletar o objeto à sua frente
+        if (selectedCreatureIndex >= 0 && selectedCreatureIndex < creatures.size()) {
+            Criatura c = creatures.get(selectedCreatureIndex);
+            try {
+                c.acao("get");
+                return true;
+            } catch (Exception e) {
+                System.out.println("Erro ao coletar: " + e);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public Object eat() {
+        // Faz a criatura selecionada comer o alimento coletado
+        if (selectedCreatureIndex >= 0 && selectedCreatureIndex < creatures.size()) {
+            Criatura c = creatures.get(selectedCreatureIndex);
+            try {
+                c.acao("eat");
+                return true;
+            } catch (Exception e) {
+                System.out.println("Erro ao comer: " + e);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public Object send() {
+        // Envia o conteúdo coletado pela criatura selecionada para o depósito
+        if (selectedCreatureIndex >= 0 && selectedCreatureIndex < creatures.size()) {
+            Criatura c = creatures.get(selectedCreatureIndex);
+            try {
+                // Primeiro entrega os itens
+                c.acao("deposit");
+                // Depois completa as missões
+                c.completeMission();
+                // Incrementa pontos na janela
+                window.points += 100; 
+                System.out.println("Criatura entregou itens e completou missões! Pontos: " + window.points);
+                return true;
+            } catch (Exception e) {
+                System.out.println("Erro ao depositar: " + e);
+                return false;
+            }
+        }
+        return false;
     }
 }

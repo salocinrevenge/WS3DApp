@@ -58,6 +58,7 @@ public class CustomButton {
 
     public void handleMousePressed(int mx, int my) {
         if (isInside(mx, my)) {
+            System.out.println("Botão '" + text + "' pressionado!");
             action.run();
         }
     }
